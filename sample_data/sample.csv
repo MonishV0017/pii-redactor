@@ -1,6 +1,6 @@
 full_name,email,notes,pii_type
 John Doe,johndoe@personalemail.com,"Contact me at my personal email",EMAIL
 Jane Smith,jane.s@workplace.net,"Card: 4111-1111-1111-1111",CREDIT_CARD
-Arjun Kumar,"My Aadhaar is 1234 5678 9012.",PAN is ABCDE1234F,AADHAAR
+Arjun Kumar,"My Aadhaar is 1234 5678 9012.","PAN is ABCDE1234F",AADHAAR
 Priya Sharma,priya@gov.in,"My PAN is FGHIJ5678K",PAN_CARD
 Amit Singh,,"My mobile is +91 9876543210",INDIAN_MOBILE

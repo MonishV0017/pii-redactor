@@ -1,17 +1,18 @@
 from collections import Counter
 from datetime import datetime
+from pathlib import Path
 
 def create_summary_report(
     pii_results: list, 
-    output_dir: object,
+    output_dir: Path,
     filename: str,
     validation_metrics: dict = None
 ):
-    report_path = output_dir / f"summary_report_{filename.split('.')[0]}.txt"
+    report_path = output_dir / f"summary_report_{Path(filename).stem}.txt"
     pii_counts = Counter(item['type'] for item in pii_results)
 
-    with open(report_path, 'w') as f:
-        f.write("--- PII Redactor Scan Report ---\n")
+    with open(report_path, 'w', encoding='utf-8') as f:
+        f.write("--- PyRedact Scan Report ---\n")
         f.write(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         f.write(f"Source File: {filename}\n")
         f.write("---------------------------------\n\n")
@@ -21,7 +22,7 @@ def create_summary_report(
         if not pii_counts:
             f.write("  - No PII detected.\n")
         else:
-            for pii_type, count in pii_counts.items():
+            for pii_type, count in sorted(pii_counts.items()):
                 f.write(f"  - {pii_type}: {count}\n")
         
         if validation_metrics:
