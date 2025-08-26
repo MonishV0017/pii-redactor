@@ -14,9 +14,11 @@ A command-line tool developed for the Cognizant NPN Cybersecurity Hackathon. Thi
 ## How to Run
 
 ### 1. Prerequisites
+
 - Python 3.8+
 
 ### 2. Setup
+
 Clone the repository and set up the environment.
 
 ```bash
@@ -45,4 +47,5 @@ The output files will be saved in the `output/` directory by default. You can sp
 ```bash
 python main.py -i sample_data/sample.csv -o my_results/
 ```
+
 The sample CSV is specifically designed to test the **Validation Module**. The tool will detect the `pii_type` column and automatically run in validation mode, adding precision/recall metrics to the summary report.
