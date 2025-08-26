@@ -1,0 +1,65 @@
+Metadata-Version: 2.4
+Name: pyredact
+Version: 1.0.0
+Summary: A professional CLI tool to detect and de-identify PII from CSV files.
+Author: MonishV0017
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: pandas
+Requires-Dist: typer[all]
+Requires-Dist: rich
+Requires-Dist: chardet
+
+# PII Redactor
+
+A command-line tool developed for the Cognizant NPN Cybersecurity Hackathon. This tool scans CSV files to detect and de-identify multiple types of Personally Identifiable Information (PII).
+
+## Features
+
+- **Multi-PII Detection**: Detects Emails, Aadhaar, PAN Cards, Credit Cards, Indian Mobile Numbers, and more using regex.
+- **Robust De-Identification**: Masks sensitive data according to predefined rules.
+- **Validation Module**: Automatically calculates Precision, Recall, and F1-Score if a `pii_type` column is provided in the input CSV.
+- **Secure by Design**: Includes checks to prevent path traversal attacks.
+- **Professional CLI**: User-friendly command-line interface with progress bars.
+- **Reporting**: Generates a de-identified CSV and a summary text report.
+
+## How to Run
+
+### 1. Prerequisites
+
+- Python 3.8+
+
+### 2. Setup
+
+Clone the repository and set up the environment.
+
+```bash
+# Clone the repository
+git clone [https://github.com/MonishV0017/pii-redactor.git](https://github.com/MonishV0017/pii-redactor.git)
+cd pii-redactor
+
+# Create and activate a virtual environment (PowerShell)
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+
+# Install all required packages
+pip install -r requirements.txt
+```
+
+### 3. Execution
+
+Run the tool by providing an input file.
+
+```bash
+python main.py --input sample_data/sample.csv
+```
+
+The output files will be saved in the `output/` directory by default. You can specify a different directory using the `--output` flag.
+
+```bash
+python main.py -i sample_data/sample.csv -o my_results/
+```
+
+The sample CSV is specifically designed to test the **Validation Module**. The tool will detect the `pii_type` column and automatically run in validation mode, adding precision/recall metrics to the summary report.
