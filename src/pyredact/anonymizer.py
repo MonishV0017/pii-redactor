@@ -3,7 +3,8 @@ def anonymize_email(email: str) -> str:
     return f"{user[0]}***@{domain}"
 
 def anonymize_credit_card(card: str) -> str:
-    return f"{'*' * 12}{card[-4:]}"
+    clean_card = card.replace(' ', '').replace('-', '')
+    return f"{'*' * (len(clean_card) - 4)}{clean_card[-4:]}"
 
 def anonymize_aadhaar(aadhaar: str) -> str:
     clean_aadhaar = aadhaar.replace(' ', '').replace('-', '')
@@ -13,7 +14,10 @@ def anonymize_pan_card(pan: str) -> str:
     return 'X' * len(pan)
     
 def anonymize_indian_mobile(mobile: str) -> str:
-    return f"{mobile[:3]}******{mobile[-2:]}"
+    clean_mobile = mobile.replace(' ', '').replace('-', '').replace('+91', '')
+    if len(clean_mobile) > 4:
+        return f"{clean_mobile[:2]}******{clean_mobile[-2:]}"
+    return 'X' * len(mobile)
 
 def anonymize_voter_id(voter_id: str) -> str:
     return 'X' * len(voter_id)

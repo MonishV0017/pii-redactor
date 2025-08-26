@@ -1,5 +1,5 @@
 import re
-from .regex_patterns import REGEX_PATTERNS
+from pyredact.regex_patterns import REGEX_PATTERNS
 
 def find_pii(text: str) -> list:
     found_pii = []
