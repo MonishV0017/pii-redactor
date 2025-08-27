@@ -16,16 +16,19 @@ console = Console()
 logging.basicConfig(level="INFO", format='%(levelname)s: %(message)s', handlers=[])
 logger = logging.getLogger(__name__)
 
-# Create a Typer app with completion disabled to keep it simple
 app = typer.Typer(rich_markup_mode="markdown", add_completion=False)
 
 ASCII_BANNER = """
-***************************************************
-* *
-* PyRedact                     *
+
+ooooooooo.   oooooo   oooo ooooooooo.   oooooooooooo oooooooooo.         .o.         .oooooo.   ooooooooooooo 
+`888   `Y88.  `888.   .8'  `888   `Y88. `888'     `8 `888'   `Y8b       .888.       d8P'  `Y8b  8'   888   `8 
+ 888   .d88'   `888. .8'    888   .d88'  888          888      888     .8"888.     888               888      
+ 888ooo88P'     `888.8'     888ooo88P'   888oooo8     888      888    .8' `888.    888               888      
+ 888             `888'      888`88b.     888    "     888      888   .88ooo8888.   888               888      
+ 888              888       888  `88b.   888       o  888     d88'  .8'     `888.  `88b    ooo       888      
+o888o            o888o     o888o  o888o o888ooooood8 o888bood8P'   o88o     o8888o  `Y8bood8P'      o888o     
+
 * A Tool for PII Detection & De-Identification  *
-* *
-***************************************************
 """
 
 def detect_encoding(file_path: Path) -> str:
@@ -42,7 +45,7 @@ def process(
     input_file: Path = typer.Option(None, "--input", "-i", help="Path to a single input CSV file."),
     input_dir: Path = typer.Option(None, "--input-dir", "-d", help="Path to a directory containing CSV files to process."),
     output_dir: Path = typer.Option("output", "--output", "-o", help="Directory to save the output files."),
-    types_to_scan: list[str] = typer.Option(None, "--types", "-t", help="A list of specific PII types to scan for (e.g., EMAIL PAN_CARD)."),
+    types_to_scan: str = typer.Option(None, "--types", "-t", help="Comma-separated list of PII types to scan for (e.g., \"EMAIL,PAN_CARD\")."),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output to see line-by-line findings."),
     force: bool = typer.Option(False, "--force", "-f", help="Force overwrite of existing output files without asking.")
 ):
@@ -64,15 +67,14 @@ def process(
     
     console.log(f"Found {len(files_to_process)} file(s) to process.")
     
+    types_list = [t.strip().upper() for t in types_to_scan.split(',')] if types_to_scan else None
+    
     for file in files_to_process:
         console.rule(f"[bold blue]Processing: {file.name}[/bold blue]")
-        # ... (processing logic for a single file) ...
-        # This is the logic from our previous main.py, wrapped for each file
-        process_single_file(file, output_dir, types_to_scan, verbose, force)
-        time.sleep(1) # Pause briefly between files
+        process_single_file(file, output_dir, types_list, verbose, force)
+        time.sleep(1)
 
 def process_single_file(input_file: Path, output_dir: Path, types_to_scan: list[str] | None, verbose: bool, force: bool):
-    # Security, output dir creation, encoding detection, etc.
     try:
         input_file.resolve().relative_to(Path.cwd().resolve())
     except ValueError:

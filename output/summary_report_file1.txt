@@ -1,0 +1,10 @@
+--- PyRedact Scan Report ---
+Timestamp: 2025-08-27 18:56:35
+Source File: file1.csv
+---------------------------------
+
+Total PII Instances Found: 1
+PII Breakdown:
+  - EMAIL: 1
+
+--- End of Report ---
