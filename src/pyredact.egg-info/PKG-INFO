@@ -12,54 +12,91 @@ Requires-Dist: typer[all]
 Requires-Dist: rich
 Requires-Dist: chardet
 
-# PII Redactor
+# PyRedact 🛡️
 
-A command-line tool developed for the Cognizant NPN Cybersecurity Hackathon. This tool scans CSV files to detect and de-identify multiple types of Personally Identifiable Information (PII).
+A professional, installable command-line tool to detect and de-identify Personally Identifiable Information (PII) from CSV files. Built for performance, security, and ease of use.
 
 ## Features
 
-- **Multi-PII Detection**: Detects Emails, Aadhaar, PAN Cards, Credit Cards, Indian Mobile Numbers, and more using regex.
-- **Robust De-Identification**: Masks sensitive data according to predefined rules.
-- **Validation Module**: Automatically calculates Precision, Recall, and F1-Score if a `pii_type` column is provided in the input CSV.
-- **Secure by Design**: Includes checks to prevent path traversal attacks.
-- **Professional CLI**: User-friendly command-line interface with progress bars.
-- **Reporting**: Generates a de-identified CSV and a summary text report.
+- **Flexible Input**: Scan a single file or an entire directory of `.csv` files.
+- **Selective Scanning**: Choose to scan for all PII types or only specific ones (e.g., just emails and phone numbers).
+- **Robust De-Identification**: Masks sensitive data according to predefined, logical rules.
+- **Cross-Platform**: Works on Windows, macOS, and Linux.
+- **Professional CLI**: User-friendly interface with a rich startup banner, progress bars, and clear feedback.
+- **Secure and Robust**: Handles file encoding issues, permission errors, and prevents path traversal attacks.
 
-## How to Run
+---
 
-### 1. Prerequisites
+## Installation & Setup for Users
 
-- Python 3.8+
+It is highly recommended to install `pyredact` in a dedicated project folder and virtual environment.
 
-### 2. Setup
+1.  **Create a Project Folder:**
+    ```powershell
+    mkdir MyPIIScans
+    cd MyPIIScans
+    ```
+2.  **Create and Activate a Virtual Environment:**
+    ```powershell
+    python -m venv venv
+    .\venv\Scripts\Activate.ps1
+    ```
+3.  **Install `pyredact`:**
+    _(This command will install the latest version from the public repository once it's published. For now, you would use `pip install .` after cloning the source code.)_
+    ```powershell
+    pip install pyredact
+    ```
 
-Clone the repository and set up the environment.
+---
+
+## Usage Guide
+
+Once installed, you can use the `pyredact` command from your terminal.
+
+### Getting Help
+
+To see all available commands and options, run:
 
 ```bash
-# Clone the repository
-git clone [https://github.com/MonishV0017/pii-redactor.git](https://github.com/MonishV0017/pii-redactor.git)
-cd pii-redactor
-
-# Create and activate a virtual environment (PowerShell)
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-
-# Install all required packages
-pip install -r requirements.txt
+pyredact --help
 ```
 
-### 3. Execution
+### Command Examples
 
-Run the tool by providing an input file.
+**1. Scan a Single File:**
 
 ```bash
-python main.py --input sample_data/sample.csv
+pyredact --input path/to/your/data.csv
 ```
 
-The output files will be saved in the `output/` directory by default. You can specify a different directory using the `--output` flag.
+**2. Scan All CSVs in a Directory:**
 
 ```bash
-python main.py -i sample_data/sample.csv -o my_results/
+pyredact --input-dir path/to/your/folder_with_csvs
 ```
 
-The sample CSV is specifically designed to test the **Validation Module**. The tool will detect the `pii_type` column and automatically run in validation mode, adding precision/recall metrics to the summary report.
+**3. Scan for Specific PII Types Only:**
+
+```bash
+pyredact --input data.csv --types EMAIL CREDIT_CARD
+```
+
+_Available types: `EMAIL`, `AADHAAR`, `PAN_CARD`, `CREDIT_CARD`, `INDIAN_MOBILE`, `VOTER_ID`, `DRIVING_LICENSE`_
+
+**4. Save to a Custom Folder:**
+
+```bash
+pyredact --input data.csv --output C:/Users/YourName/Desktop/Results
+```
+
+**5. Enable Verbose Logging:**
+
+```bash
+pyredact --input data.csv --verbose
+```
+
+**6. Force Overwrite of Existing Output:**
+
+```bash
+pyredact --input data.csv --force
+```

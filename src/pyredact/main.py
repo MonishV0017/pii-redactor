@@ -6,6 +6,7 @@ import chardet
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn
 from rich.table import Table
+import time
 
 from pyredact.detector import find_pii
 from pyredact.anonymizer import anonymize_pii
@@ -15,20 +16,16 @@ console = Console()
 logging.basicConfig(level="INFO", format='%(levelname)s: %(message)s', handlers=[])
 logger = logging.getLogger(__name__)
 
-app = typer.Typer(rich_markup_mode="markdown")
+# Create a Typer app with completion disabled to keep it simple
+app = typer.Typer(rich_markup_mode="markdown", add_completion=False)
 
 ASCII_BANNER = """
- ███████████  █████ █████ ███████████   ██████████ ██████████     █████████     █████████  ███████████
-░░███░░░░░███░░███ ░░███ ░░███░░░░░███ ░░███░░░░░█░░███░░░░███   ███░░░░░███   ███░░░░░███░█░░░███░░░█
- ░███    ░███ ░░███ ███   ░███    ░███  ░███  █ ░  ░███   ░░███ ░███    ░███  ███     ░░░ ░   ░███  ░ 
- ░██████████   ░░█████    ░██████████   ░██████    ░███    ░███ ░███████████ ░███             ░███    
- ░███░░░░░░     ░░███     ░███░░░░░███  ░███░░█    ░███    ░███ ░███░░░░░███ ░███             ░███    
- ░███            ░███     ░███    ░███  ░███ ░   █ ░███    ███  ░███    ░███ ░░███     ███    ░███    
- █████           █████    █████   █████ ██████████ ██████████   █████   █████ ░░█████████     █████   
-░░░░░           ░░░░░    ░░░░░   ░░░░░ ░░░░░░░░░░ ░░░░░░░░░░   ░░░░░   ░░░░░   ░░░░░░░░░     ░░░░░    
-                                                                                                      
-                                                                                                      
-                                                                                                      
+***************************************************
+* *
+* PyRedact                     *
+* A Tool for PII Detection & De-Identification  *
+* *
+***************************************************
 """
 
 def detect_encoding(file_path: Path) -> str:
@@ -37,91 +34,98 @@ def detect_encoding(file_path: Path) -> str:
     result = chardet.detect(raw_data)
     return result['encoding'] or 'utf-8'
 
-def calculate_validation_metrics(tp, fp, fn):
-    precision = tp / (tp + fp) if (tp + fp) > 0 else 0
-    recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-    f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
-    return {"tp": tp, "fp": fp, "fn": fn, "precision": precision, "recall": recall, "f1_score": f1_score}
+def get_files_from_dir(dir_path: Path) -> list[Path]:
+    return list(dir_path.glob("*.csv"))
 
 @app.command()
 def process(
-    input_file: Path = typer.Option(..., "--input", "-i", help="Path to the input CSV file.", exists=True, file_okay=True, dir_okay=False, readable=True),
+    input_file: Path = typer.Option(None, "--input", "-i", help="Path to a single input CSV file."),
+    input_dir: Path = typer.Option(None, "--input-dir", "-d", help="Path to a directory containing CSV files to process."),
     output_dir: Path = typer.Option("output", "--output", "-o", help="Directory to save the output files."),
+    types_to_scan: list[str] = typer.Option(None, "--types", "-t", help="A list of specific PII types to scan for (e.g., EMAIL PAN_CARD)."),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output to see line-by-line findings."),
+    force: bool = typer.Option(False, "--force", "-f", help="Force overwrite of existing output files without asking.")
 ):
     console.print(f"[bold green]{ASCII_BANNER}[/bold green]")
+    
+    if not input_file and not input_dir:
+        console.print("❌ [bold red]Error:[/bold red] You must provide an input using either '--input' for a file or '--input-dir' for a directory.")
+        raise typer.Exit(code=1)
 
-    # --- Security (OWASP): Prevent Path Traversal ---
+    if input_file and input_dir:
+        console.print("❌ [bold red]Error:[/bold red] Please provide either '--input' or '--input-dir', not both.")
+        raise typer.Exit(code=1)
+
+    files_to_process = [input_file] if input_file else get_files_from_dir(input_dir)
+    
+    if not files_to_process:
+        console.print(f"⚠️ [yellow]Warning:[/yellow] No CSV files found in the specified directory.")
+        raise typer.Exit()
+    
+    console.log(f"Found {len(files_to_process)} file(s) to process.")
+    
+    for file in files_to_process:
+        console.rule(f"[bold blue]Processing: {file.name}[/bold blue]")
+        # ... (processing logic for a single file) ...
+        # This is the logic from our previous main.py, wrapped for each file
+        process_single_file(file, output_dir, types_to_scan, verbose, force)
+        time.sleep(1) # Pause briefly between files
+
+def process_single_file(input_file: Path, output_dir: Path, types_to_scan: list[str] | None, verbose: bool, force: bool):
+    # Security, output dir creation, encoding detection, etc.
     try:
         input_file.resolve().relative_to(Path.cwd().resolve())
     except ValueError:
-        console.print(f"❌ [bold red]Security Error:[/bold red] Input file is outside the project directory. Aborting.")
-        raise typer.Exit(code=1)
-    
+        console.print(f"❌ [bold red]Security Error:[/bold red] Input file {input_file.name} is outside the project directory. Skipping.")
+        return
+
     try:
         output_dir.mkdir(parents=True, exist_ok=True)
     except PermissionError:
-        console.print(f"❌ [bold red]Permission Error:[/bold red] Could not create output directory.")
+        console.print(f"❌ [bold red]Permission Error:[/bold red] Could not create output directory. Aborting.")
         raise typer.Exit(code=1)
+        
+    output_file = output_dir / f"deidentified_{input_file.name}"
+    if output_file.exists() and not force:
+        if not typer.confirm(f"⚠️ Output file {output_file} already exists. Overwrite?"):
+            console.print("[yellow]Skipping file.[/yellow]")
+            return
 
     try:
         encoding = detect_encoding(input_file)
+        if verbose: console.log(f"Detected encoding: [yellow]{encoding}[/yellow]")
         df = pd.read_csv(input_file, dtype=str, encoding=encoding, engine='python').fillna('')
     except Exception as e:
-        console.print(f"❌ [bold red]File Read Error:[/bold red] Could not read CSV. Reason: {e}")
-        raise typer.Exit(code=1)
+        console.print(f"❌ [bold red]File Read Error:[/bold red] Could not read {input_file.name}. Reason: {e}")
+        return
     
     if df.empty:
-        console.print("⚠️ [yellow]Warning:[/yellow] Input file is empty. No output generated.")
-        raise typer.Exit()
+        console.print(f"⚠️ [yellow]Warning:[/yellow] Input file {input_file.name} is empty.")
+        return
         
     all_pii_found = []
-    validation_mode = 'pii_type' in df.columns
-    tp, fp, fn = 0, 0, 0
 
     with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("[progress.percentage]{task.percentage:>3.0f}%")) as progress:
-        task = progress.add_task("[green]Processing file...", total=len(df))
+        task = progress.add_task("[green]Scanning rows...", total=len(df))
         for index, row in df.iterrows():
-            row_text = ' '.join(row.astype(str))
-            pii_results = find_pii(row_text)
-
-            if validation_mode:
-                true_pii_type = row.get('pii_type', '').upper()
-                detected_types = {p['type'] for p in pii_results}
-                if true_pii_type and true_pii_type in detected_types:
-                    tp += 1
-                    detected_types.remove(true_pii_type)
-                elif true_pii_type and true_pii_type not in detected_types:
-                    fn += 1
-                fp += len(detected_types)
-            
-            if pii_results:
-                all_pii_found.extend(pii_results)
-                for col in df.columns:
-                    if validation_mode and col == 'pii_type': continue
-                    cell_text = row[col]
+            for col in df.columns:
+                cell_text = row[col]
+                pii_results = find_pii(cell_text, types_to_scan)
+                if pii_results:
+                    if verbose: console.log(f"Found PII in row {index+2}, column '{col}': {[p['value'] for p in pii_results]}")
+                    all_pii_found.extend(pii_results)
                     modified_text = cell_text
-                    for pii in find_pii(cell_text):
+                    for pii in pii_results:
                         anonymized_value = anonymize_pii(pii['type'], pii['value'])
                         modified_text = modified_text.replace(pii['value'], anonymized_value)
                     df.loc[index, col] = modified_text
             progress.update(task, advance=1)
     
-    output_file = output_dir / f"deidentified_{input_file.name}"
     df.to_csv(output_file, index=False)
+    report_path = create_summary_report(all_pii_found, output_dir, input_file.name)
     
-    validation_metrics = calculate_validation_metrics(tp, fp, fn) if validation_mode else None
-    report_path = create_summary_report(all_pii_found, output_dir, input_file.name, validation_metrics)
-    
-    console.rule("[bold blue]Scan Complete[/bold blue]")
-    summary_table = Table(title="Summary")
-    summary_table.add_column("Item", style="cyan")
-    summary_table.add_column("Details", style="magenta")
-    summary_table.add_row("Total PII Found", str(len(all_pii_found)))
-    summary_table.add_row("De-identified File", str(output_file))
-    summary_table.add_row("Summary Report", str(report_path))
-    if validation_mode:
-        summary_table.add_row("[bold]F1-Score[/bold]", f"{validation_metrics['f1_score']:.2f}")
-    console.print(summary_table)
+    console.log(f"✅ [green]Success![/green] De-identified file saved to [cyan]{output_file}[/cyan]")
+    console.log(f"✅ [green]Success![/green] Summary report saved to [cyan]{report_path}[/cyan]")
 
 if __name__ == "__main__":
     app()

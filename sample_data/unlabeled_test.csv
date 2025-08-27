@@ -1,0 +1,9 @@
+employee_id,full_name,contact_info,transaction_notes
+101,Rohan Mehra,rohan.mehra@example.com,"Approved. Card 5555-6666-7777-8888 was used. Call +91 9988776655 for issues."
+102,Anjali Sharma,,"Please send invoice to anjali.s@company.org. PAN is ABCDE1234F."
+103,Vikram Singh,vikram-singh@proton.me,"Aadhaar verification needed: 9876 5432 1098. Voter ID is XYZ9876543."
+104,Sunita Patil,,"DL is MH-14-2022-1234567. Payment pending for card ending in 9999."
+105,Deepak Verma,call 09876512345,"Client mentioned email test.user+alias@gmail.co.in and PAN ZYXWV9876E"
+106,Pooja Desai,pooja@customdomain.io,"No PII in this record, just a standard transaction note."
+107,Sameer Khan,,"Voter ID: FGH1234567. Please confirm details via sameer.khan@hotmail.com"
+108,Neha Reddy,,"Emergency contact is 8877665544. Aadhaar on file is 1122 3344 5566."
