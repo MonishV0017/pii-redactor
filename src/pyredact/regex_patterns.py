@@ -1,14 +1,10 @@
 REGEX_PATTERNS = {
-    # --- Universal / Globally Relevant PII ---
     "EMAIL": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
     "PHONE_NUMBER": r"\b(?:\+?\d{1,3}[-\s.]?)?(?:\(?\d{3}\)?)[-\s.]?\d{3}[-\s.]?\d{4}\b",
     "PAYMENT_CARD_NUMBER": r"\b(?:\d{4}[-\s]?){3}\d{4}\b",
-    
     "CVV": r"\b(?<![\d-])\d{3,4}(?![\d-])\b",
     "DOB": r"\b(?:0?[1-9]|[12][0-9]|3[01])[-/.](?:0?[1-9]|1[012])[-/.](?:19|20)\d\d\b",
     "IP_ADDRESS": r"\b(?:\d{1,3}\.){3}\d{1,3}\b",
-
-    # --- Indian Specific PII ---
     "INDIAN_MOBILE": r"\b(?:\+91|0)?[-\s]?[6-9]\d{9}\b",
     "AADHAAR": r"\b\d{4}\s?\d{4}\s?\d{4}\b",
     "PAN_CARD": r"\b[A-Z]{5}\d{4}[A-Z]\b",

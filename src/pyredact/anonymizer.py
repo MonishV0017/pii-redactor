@@ -1,4 +1,3 @@
-# Counter for generating unique pseudo-anonymous user IDs
 pseudo_user_id_counter = 1
 
 def anonymize_email(email: str) -> str:
