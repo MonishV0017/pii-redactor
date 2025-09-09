@@ -20,7 +20,7 @@ dependencies = [
     "typer[all]",
     "rich",
     "chardet",
-]
+  ]
 
 [project.scripts]
 pyredact = "pyredact.main:app"

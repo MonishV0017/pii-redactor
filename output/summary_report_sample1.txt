@@ -1,0 +1,20 @@
+--- PyRedact Scan Report ---
+Timestamp: 2025-09-09 12:08:32
+Source File: sample1.csv
+---------------------------------
+
+Total PII Instances Found: 39
+PII Breakdown:
+  - AADHAAR: 2
+  - CVV: 11
+  - DOB: 2
+  - EMAIL: 5
+  - IFSC_CODE: 2
+  - INDIAN_PASSPORT: 2
+  - IP_ADDRESS: 2
+  - PAN_CARD: 2
+  - PAYMENT_CARD_NUMBER: 2
+  - PHONE_NUMBER: 7
+  - VOTER_ID: 2
+
+--- End of Report ---

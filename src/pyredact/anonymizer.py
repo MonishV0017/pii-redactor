@@ -1,42 +1,67 @@
-def anonymize_email(email: str) -> str:
-    user, domain = email.split('@')
-    return f"{user[0]}***@{domain}"
+# Counter for generating unique pseudo-anonymous user IDs
+pseudo_user_id_counter = 1
 
-def anonymize_credit_card(card: str) -> str:
+def anonymize_email(email: str) -> str:
+    global pseudo_user_id_counter
+    _user, domain = email.split('@')
+    anonymized_user = f"user_{pseudo_user_id_counter}"
+    pseudo_user_id_counter += 1
+    return f"{anonymized_user}@{domain}"
+
+def anonymize_phone_number(phone: str) -> str:
+    clean_phone = ''.join(filter(str.isdigit, phone))
+    if len(clean_phone) > 4:
+        return f"{'*' * (len(clean_phone) - 4)}{clean_phone[-4:]}"
+    return 'X' * len(phone)
+
+def anonymize_payment_card(card: str) -> str:
     clean_card = card.replace(' ', '').replace('-', '')
     return f"{'*' * (len(clean_card) - 4)}{clean_card[-4:]}"
 
-def anonymize_aadhaar(aadhaar: str) -> str:
-    clean_aadhaar = aadhaar.replace(' ', '').replace('-', '')
-    return f"{clean_aadhaar[:4]}-XXXX-{clean_aadhaar[-4:]}"
+def anonymize_cvv(cvv: str) -> str:
+    return '*' * len(cvv)
 
-def anonymize_pan_card(pan: str) -> str:
-    return 'X' * len(pan)
+def anonymize_dob(dob: str) -> str:
+    parts = dob.replace('/', '-').split('-')
+    return f"XX-XX-{parts[-1]}"
+
+def anonymize_ip_address(ip: str) -> str:
+    parts = ip.split('.')
+    return f"***.***.***.{parts[-1]}"
     
+def anonymize_full_redaction(value: str) -> str:
+    return 'X' * len(value)
+
 def anonymize_indian_mobile(mobile: str) -> str:
     clean_mobile = mobile.replace(' ', '').replace('-', '').replace('+91', '')
     if len(clean_mobile) > 4:
         return f"{clean_mobile[:2]}******{clean_mobile[-2:]}"
     return 'X' * len(mobile)
 
-def anonymize_voter_id(voter_id: str) -> str:
-    return 'X' * len(voter_id)
+def anonymize_aadhaar(aadhaar: str) -> str:
+    clean_aadhaar = aadhaar.replace(' ', '').replace('-', '')
+    return f"{clean_aadhaar[:4]}-XXXX-{clean_aadhaar[-4:]}"
 
-def anonymize_driving_license(license_num: str) -> str:
-    parts = license_num.replace('-', ' ').split()
-    if len(parts) > 1:
-        parts[-1] = 'X' * len(parts[-1])
-        return '-'.join(parts)
-    return 'X' * len(license_num)
+def anonymize_ifsc_code(ifsc: str) -> str:
+    return f"{ifsc[:4]}XXXXXXX"
+
+def anonymize_indian_bank_account(account_num: str) -> str:
+    return f"{'*' * (len(account_num) - 4)}{account_num[-4:]}"
 
 ANONYMIZATION_RULES = {
     'EMAIL': anonymize_email,
-    'CREDIT_CARD': anonymize_credit_card,
-    'AADHAAR': anonymize_aadhaar,
-    'PAN_CARD': anonymize_pan_card,
+    'PHONE_NUMBER': anonymize_phone_number,
+    'PAYMENT_CARD_NUMBER': anonymize_payment_card,
+    'CVV': anonymize_cvv,
+    'DOB': anonymize_dob,
+    'IP_ADDRESS': anonymize_ip_address,
     'INDIAN_MOBILE': anonymize_indian_mobile,
-    'VOTER_ID': anonymize_voter_id,
-    'DRIVING_LICENSE': anonymize_driving_license,
+    'AADHAAR': anonymize_aadhaar,
+    'PAN_CARD': anonymize_full_redaction,
+    'VOTER_ID': anonymize_full_redaction,
+    'IFSC_CODE': anonymize_ifsc_code,
+    'INDIAN_BANK_ACCOUNT': anonymize_indian_bank_account,
+    'INDIAN_PASSPORT': anonymize_full_redaction,
 }
 
 def anonymize_pii(pii_type: str, pii_value: str) -> str:
