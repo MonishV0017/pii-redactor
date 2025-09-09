@@ -52,7 +52,7 @@ def process(
     input_dir: Path = typer.Option(None, "--input-dir", "-d", help="Path to a directory containing CSV files to process."),
     output_dir: Path = typer.Option("output", "--output", "-o", help="Directory to save the output files."),
     types_to_scan: str = typer.Option(None, "--types", "-t", help=f"Comma-separated list of specific PII types to scan for. Available types: {', '.join(REGEX_PATTERNS.keys())}"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output to see line-by-line findings."),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output and add detailed findings to the report."),
     force: bool = typer.Option(False, "--force", "-f", help="Force overwrite of existing output files without asking.")
 ):
     console.print(f"[bold green]{ASCII_BANNER}[/bold green]")
@@ -106,35 +106,33 @@ def process_single_file(input_file: Path, output_dir: Path, types_to_scan: list[
         return
         
     all_pii_found = []
-    validation_mode = 'pii_type' in df.columns
+    verbose_log = []
+    
+    validation_mode_col = 'pii_type' in df.columns
+    validation_mode_header = any(col in REGEX_PATTERNS for col in df.columns)
+    is_validation = validation_mode_col or validation_mode_header
+    
     tp, fp, fn = 0, 0, 0
+
+    df_for_processing = df.copy()
 
     with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), BarColumn(), TextColumn("[progress.percentage]{task.percentage:>3.0f}%")) as progress:
         task = progress.add_task("[green]Scanning rows...", total=len(df))
         for index, row in df.iterrows():
             
-            if validation_mode:
-                row_text_for_validation = ' '.join(row.astype(str))
-                detected_pii_in_row = find_pii(row_text_for_validation, types_to_scan)
-                detected_types = {p['type'] for p in detected_pii_in_row}
-                true_pii_type = row.get('pii_type', '').upper()
-                
-                if true_pii_type and true_pii_type in detected_types:
-                    tp += 1
-                    detected_types.remove(true_pii_type)
-                elif true_pii_type and true_pii_type not in detected_types:
-                    fn += 1
-                fp += len(detected_types)
-
             for col in df.columns:
-                if validation_mode and col == 'pii_type':
-                    continue
+                if col == 'pii_type': continue
                 
                 cell_text = str(row[col])
                 pii_results = find_pii(cell_text, types_to_scan)
                 
                 if pii_results:
-                    if verbose: console.log(f"Found PII in row {index+2}, column '{col}': {[p['value'] for p in pii_results]}")
+                    if verbose:
+                        for p in pii_results:
+                            log_entry = {'type': p['type'], 'value': p['value'], 'row': index + 2, 'col': col}
+                            console.log(f"Found {log_entry['type']}: {log_entry['value']} in row {log_entry['row']}, col '{log_entry['col']}'")
+                            verbose_log.append(log_entry)
+                    
                     all_pii_found.extend(pii_results)
                     
                     modified_text = cell_text
@@ -142,17 +140,45 @@ def process_single_file(input_file: Path, output_dir: Path, types_to_scan: list[
                         anonymized_value = anonymize_pii(pii['type'], pii['value'])
                         modified_text = modified_text.replace(pii['value'], anonymized_value)
                     
-                    df.loc[index, col] = modified_text
+                    df_for_processing.loc[index, col] = modified_text
+            
+            if is_validation:
+                if validation_mode_header:
+                    for col_name in df.columns:
+                        if col_name in REGEX_PATTERNS:
+                            cell_content = str(row.get(col_name, ''))
+                            detected_types_in_cell = {p['type'] for p in find_pii(cell_content, types_to_scan)}
+                            if col_name in detected_types_in_cell:
+                                tp += 1
+                                detected_types_in_cell.remove(col_name)
+                            elif cell_content:
+                                fn += 1
+                            fp += len(detected_types_in_cell)
+
+                if validation_mode_col:
+                    row_text_for_validation = ' '.join(row.astype(str))
+                    detected_types_in_row = {p['type'] for p in find_pii(row_text_for_validation, types_to_scan)}
+                    true_pii_type = row.get('pii_type', '').upper()
+                    
+                    if true_pii_type and true_pii_type in detected_types_in_row:
+                        tp += 1
+                        detected_types_in_row.remove(true_pii_type)
+                    elif true_pii_type and true_pii_type not in detected_types_in_row:
+                        fn += 1
+                    fp += len(detected_types_in_row)
 
             progress.update(task, advance=1)
     
-    df.to_csv(output_file, index=False)
+    df_for_processing.to_csv(output_file, index=False)
     
-    validation_metrics = calculate_validation_metrics(tp, fp, fn) if validation_mode else None
-    report_path = create_summary_report(all_pii_found, output_dir, input_file.name, validation_metrics)
+    validation_metrics = calculate_validation_metrics(tp, fp, fn) if is_validation else None
+    final_verbose_log = verbose_log if verbose else None
+    report_path = create_summary_report(all_pii_found, output_dir, input_file.name, validation_metrics, final_verbose_log)
     
     console.log(f"✅ [green]Success![/green] De-identified file saved to [cyan]{output_file}[/cyan]")
     console.log(f"✅ [green]Success![/green] Summary report saved to [cyan]{report_path}[/cyan]")
+    if validation_metrics:
+        console.log(f"📊 Validation F1-Score: [bold yellow]{validation_metrics['f1_score']:.2f}[/bold yellow]")
 
 if __name__ == "__main__":
     app()

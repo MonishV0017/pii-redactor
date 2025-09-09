@@ -3,10 +3,10 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pyredact"
+name = "pyredact-mv"
 version = "1.0.0"
 authors = [
-  { name="MonishV0017" },
+  { name="MonishV0017", email="monishv0017@gmail.com" },
 ]
 description = "A professional CLI tool to detect and de-identify PII from CSV files."
 readme = "README.md"
@@ -22,5 +22,8 @@ dependencies = [
     "chardet",
 ]
 
+[project.urls]
+Homepage = "https://github.com/MonishV0017/pii-redactor"
+
 [project.scripts]
-pyredact = "pyredact.main:app"
+pyredact-mv = "pyredact.main:app"

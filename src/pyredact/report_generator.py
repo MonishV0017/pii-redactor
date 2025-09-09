@@ -6,7 +6,8 @@ def create_summary_report(
     pii_results: list, 
     output_dir: Path,
     filename: str,
-    validation_metrics: dict = None
+    validation_metrics: dict = None,
+    verbose_log: list = None
 ):
     report_path = output_dir / f"summary_report_{Path(filename).stem}.txt"
     pii_counts = Counter(item['type'] for item in pii_results)
@@ -34,6 +35,11 @@ def create_summary_report(
             f.write(f"Recall: {validation_metrics['recall']:.2f}\n")
             f.write(f"F1-Score: {validation_metrics['f1_score']:.2f}\n")
         
+        if verbose_log:
+            f.write("\n--- Detailed Findings (Verbose Mode) ---\n")
+            for log_entry in verbose_log:
+                f.write(f"- Found {log_entry['type']}: {log_entry['value']} in row {log_entry['row']}, col '{log_entry['col']}'\n")
+
         f.write("\n--- End of Report ---\n")
 
     return report_path
