@@ -1,4 +1,0 @@
-pandas
-typer[all]
-rich
-chardet

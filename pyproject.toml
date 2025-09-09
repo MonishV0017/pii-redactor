@@ -17,10 +17,10 @@ classifiers = [
 ]
 dependencies = [
     "pandas",
-    "typer[all]",
+    "typer",
     "rich",
     "chardet",
-  ]
+]
 
 [project.scripts]
 pyredact = "pyredact.main:app"

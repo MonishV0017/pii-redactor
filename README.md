@@ -6,16 +6,16 @@ A professional, installable command-line tool to detect and de-identify Personal
 
 - **Multi-Format Support**: Scans `.csv`, `.pdf`, and `.txt` files.
 - **Comprehensive PII Detection**: Detects a wide range of global and Indian-specific PII types.
-- **Flexible Input**: Scan a single file.
-- **Selective Scanning**: Choose to scan for all PII types or only specific ones.
-- **Professional CLI**: A user-friendly interface with a startup banner, progress bars, and summary tables.
-- **Secure and Robust**: Handles permission errors and provides clear feedback.
+- **Flexible Input**: Scan a single file or an entire directory of `.csv` files.
+- **Selective Scanning**: Choose to scan for all PII types or only for specific ones.
+- **Professional CLI**: A user-friendly interface with a startup banner, progress bars, a self-documenting `--help` menu, and clear error messages.
+- **Secure and Robust**: Handles permission errors and various text encodings automatically.
 
 ---
 
 ## Installation
 
-It is highly recommended to create a dedicated project folder and use a virtual environment for a clean and stable experience.
+It is highly recommended to create a dedicated folder and use a virtual environment for a clean and stable experience.
 
 1.  **Create a Project Folder and Open a Terminal:**
 
@@ -35,7 +35,7 @@ It is highly recommended to create a dedicated project folder and use a virtual 
     ```powershell
     pip install pyredact
     ```
-    _(Note: To install the testing version, use the command `pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple pyredact`)_
+    _(Note: To install a testing version, use the command `pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple pyredact`)_
 
 ---
 
@@ -45,27 +45,43 @@ Once installed, use the `pyredact` command from your terminal.
 
 ### Getting Help
 
-To see all available commands and options, run:
+To see a full list of all available commands and options, run:
 
 ```bash
 pyredact --help
 ```
 
-### Command Examples
+### Example Scenarios
 
-- **Scan a single file (CSV, PDF, or TXT):**
+- **Scan a single PDF file and save to the default `output/` folder:**
 
   ```bash
-  pyredact --input path/to/your/data.pdf
+  pyredact --input C:\Users\YourName\Documents\report.pdf
   ```
 
-- **Scan for specific PII types only:**
+- **Scan all `.csv` files in a specific directory:**
 
   ```bash
-  pyredact --input data.csv --types "EMAIL,INDIAN_MOBILE"
+  pyredact --input-dir path/to/your/folder_with_csvs
   ```
 
-- **Save results to a custom folder:**
+- **Scan a file for only Emails and PAN Cards:**
+
   ```bash
-  pyredact --input data.txt --output C:/My_Results
+  pyredact --input data.csv --types "EMAIL,PAN_CARD"
+  ```
+
+- **Scan a file and save the results to a custom folder:**
+
+  ```bash
+  pyredact --input data.txt --output C:/My_Secure_Results
+  ```
+
+- **Scan a file with detailed, line-by-line logging:**
+  ```bash
+  pyredact --input sensitive_data.csv --verbose
+  ```
+- **Scan a file and overwrite any existing output without asking for confirmation:**
+  ```bash
+  pyredact --input sensitive_data.csv --force
   ```

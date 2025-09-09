@@ -1,5 +1,0 @@
-record_id,client_name,contact_info,kyc_documents,log_data,pii_type
-
-201,"Rohan Kumar","rohan.kumar@work.net, (555) 987-6543, +91-8877665544","ID proofs: Aadhaar is 4444 5555 6666, PAN is LMNOP0123O, Voter ID is CDE7654321, and Passport is U3456789.","Login from 172.16.0.1 on 02-02-1992. Payment card 5100-1000-1000-1000 with CVV 234 was used. Bank details: Acct 3344556677889 IFSC KKBK0000123.",AADHAAR
-
-202,"Anika Desai","anika.d@example.com, 212-555-1234, 7766554433","Secondary docs: Aadhaar is 7654 3210 9876, PAN is JKLMN8901M, Voter ID is DEF6543210, Passport V4567890.","IP: 8.8.8.8. DOB: 03/04/1993. Second card 4500-5000-5000-5000 (CVV 567) for account 4455667788990 with IFSC PUNB0123456.",PAN_CARD
